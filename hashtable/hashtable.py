@@ -24,6 +24,7 @@ class HashTable:
     def __init__(self, capacity):
         self.capacity = capacity
         self.storage = [None] * capacity
+        self.size = 0
 
     def get_num_slots(self):
         """
@@ -43,7 +44,7 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        return self.size / self.capacity
 
     def fnv1(self, key):
         """
@@ -101,6 +102,9 @@ class HashTable:
                     node.value = value
                     return
             node.next = HashTableEntry(key, value)
+            self.size += 1
+            if self.get_load_factor() > 0.7:
+                self.resize(self.capacity * 2)
 
     def delete(self, key):
         """
@@ -118,12 +122,14 @@ class HashTable:
             node = self.storage[store_index]
             if node.key == key:
                 self.storage[store_index] = node.next
+                self.dec_size()
                 return
             while node.next:
                 prev = node
                 node = node.next
                 if node.key == key:
                     prev.next = node.next
+                    self.dec_size()
                     return
 
             print(f"Error: no value stored at {key}")
@@ -155,7 +161,20 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        old_storage = self.storage
+        self.storage = [None] * new_capacity
+        self.capacity = new_capacity
+        for i in old_storage:
+            node = i
+            while node:
+                self.put(node.key, node.value)
+                node = node.next
+
+    def dec_size(self):
+        self.size -= 1
+        if self.get_load_factor() < 0.2 and self.capacity > 8:
+            new_size = max(self.capacity / 2, 8)
+            self.resize(new_size)
 
 
 if __name__ == "__main__":
