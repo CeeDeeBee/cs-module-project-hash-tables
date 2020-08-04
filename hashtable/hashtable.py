@@ -88,7 +88,19 @@ class HashTable:
         Implement this.
         """
         store_index = self.hash_index(key)
-        self.storage[store_index] = value
+        if not self.storage[store_index]:
+            self.storage[store_index] = HashTableEntry(key, value)
+        else:
+            node = self.storage[store_index]
+            if node.key == key:
+                node.value = value
+                return
+            while node.next:
+                node = node.next
+                if node.key == key:
+                    node.value = value
+                    return
+            node.next = HashTableEntry(key, value)
 
     def delete(self, key):
         """
@@ -99,7 +111,22 @@ class HashTable:
         Implement this.
         """
         store_index = self.hash_index(key)
-        self.storage[store_index] = None
+        if not self.storage[store_index]:
+            print(f"Error: no value stored at {key}")
+        else:
+            prev = None
+            node = self.storage[store_index]
+            if node.key == key:
+                self.storage[store_index] = node.next
+                return
+            while node.next:
+                prev = node
+                node = node.next
+                if node.key == key:
+                    prev.next = node.next
+                    return
+
+            print(f"Error: no value stored at {key}")
 
     def get(self, key):
         """
@@ -110,7 +137,16 @@ class HashTable:
         Implement this.
         """
         store_index = self.hash_index(key)
-        return self.storage[store_index]
+        if self.storage[store_index]:
+            node = self.storage[store_index]
+            while node:
+                if node.key == key:
+                    return node.value
+                node = node.next
+
+            return None
+        else:
+            return None
 
     def resize(self, new_capacity):
         """
